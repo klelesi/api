@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\CustomParsedown;
 use App\Http\Requests\CreatePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
@@ -112,14 +111,6 @@ class PostController extends Controller
         ]);
 
         return $post;
-    }
-
-    private static function parseMarkdown(string $markdown): string
-    {
-        $html = (new CustomParsedown())->setSafeMode(true)->text($markdown);
-        $purifier = new \HTMLPurifier(['HTML.TargetNoreferrer' => true, 'HTML.TargetNoopener' => true, 'Attr.AllowedFrameTargets' => ['_blank']]);
-
-        return $purifier->purify($html);
     }
 
     private function createLinkPost(array $data, User $author): Post

@@ -17,4 +17,9 @@ Route::middleware(['auth:sanctum'])->group(function ($routes) {
     Route::put('/posts/{id}', [\App\Http\Controllers\PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [\App\Http\Controllers\PostController::class, 'delete'])->name('posts.delete');
     Route::post('/posts/{id}/restore', [\App\Http\Controllers\PostController::class, 'restore'])->name('posts.restore');
+
+    Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'delete'])->name('comments.delete');
+    Route::post('/comments/{id}/restore', [\App\Http\Controllers\CommentController::class, 'restore'])->name('comments.restore');
 });
