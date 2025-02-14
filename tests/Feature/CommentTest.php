@@ -4,12 +4,8 @@
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
-use App\Services\LinkData;
-use App\Services\LinkService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Mockery;
 use Tests\TestCase;
 
 class CommentTest extends TestCase

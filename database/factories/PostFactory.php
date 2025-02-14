@@ -25,6 +25,7 @@ class PostFactory extends Factory
             'id' => Str::orderedUuid()->toString(),
             'title' => $this->faker->sentence(),
             'author_id' => User::factory(),
+            'created_at' => $this->faker->dateTimeBetween('-3 months', '3 months'),
         ];
     }
 

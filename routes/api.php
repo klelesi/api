@@ -8,6 +8,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/posts/{id}', [\App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
+Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'feed'])->name('feed');
 
 Route::middleware(['auth:sanctum'])->group(function ($routes) {
     Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('user.show');
