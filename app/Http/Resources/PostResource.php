@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\AuthorResource;
 
 class PostResource extends JsonResource
 {
@@ -20,6 +21,7 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'numberOfComments' => $this->number_of_comments,
+            'author' => new AuthorResource($this->author),
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
         ];
