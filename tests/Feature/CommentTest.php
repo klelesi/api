@@ -26,6 +26,23 @@ class CommentTest extends TestCase
         $this->assertDatabaseHas('markdowns', ['markdownable_id' => $commentId, 'html' => '<h1>Hello</h1>']);
     }
 
+    public function test_storing_a_comment_increases_comment_count_on_post()
+    {
+        $user = User::factory()->createOne();
+        $post = Post::factory()->markdownPost()->createOne();
+
+        $data = ['markdown' => '#Hello', 'postId' => $post->id];
+
+        $response = $this->actingAs($user, 'sanctum')->postJson(route('comments.store'), $data)->assertStatus(201);
+
+        $this->assertDatabaseHas('posts', ['id' => $post->id, 'number_of_comments' => 1]);
+
+        $data['parentId'] = Comment::first()->id;
+        $response = $this->actingAs($user, 'sanctum')->postJson(route('comments.store'), $data)->assertStatus(201);
+
+        $this->assertDatabaseHas('posts', ['id' => $post->id, 'number_of_comments' => 2]);
+    }
+
     public function test_it_stores_a_nested_comment()
     {
         $user = User::factory()->createOne();

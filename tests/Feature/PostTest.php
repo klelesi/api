@@ -64,6 +64,7 @@ class PostTest extends TestCase
 
         $this->assertSame($response->json('data.id'), $post->id);
         $this->assertSame($response->json('data.postType'), $post->post_type);
+        $this->assertSame($response->json('data.numberOfComments'), $post->number_of_comments);
         $this->assertSame($response->json('data.title'), $post->title);
         $this->assertSame($response->json('data.slug'), $post->slug);
         $this->assertNotNull($response->json('data.createdAt'));

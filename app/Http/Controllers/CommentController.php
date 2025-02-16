@@ -19,7 +19,6 @@ class CommentController extends Controller
            $postId = Comment::where('id', $parentId)->first()->commentable_id ?? $postId;
         }
 
-
         $comment = Comment::create([
             'author_id' => $request->user('sanctum')->id,
             'commentable_id' => $postId,
@@ -31,6 +30,8 @@ class CommentController extends Controller
             'markdown' => $request->validated('markdown'),
             'html' => $this->parseMarkdown($request->validated('markdown')),
         ]);
+
+        Post::where('id', $postId)->increment('number_of_comments');
 
         return new CommentResource($comment);
     }
