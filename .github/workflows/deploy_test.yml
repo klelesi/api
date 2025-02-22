@@ -1,0 +1,66 @@
+name: Deploy to test
+run-name: Deploy to test
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Setup php
+        uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        with:
+          php-version: '8.3'
+      - uses: actions/checkout@v3
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Install dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Generate key
+        run: php artisan key:generate
+      - name: Set directory permissions
+        run: chmod -R 777 storage bootstrap/cache
+      - name: Setup database
+        uses: shogo82148/actions-setup-mysql@v1
+        with:
+          distribution: 'mariadb'
+          mysql-version: '10.9'
+          root-password: 'secret'
+      - run: mysql -uroot -psecret -h127.0.0.1 -e 'CREATE DATABASE testing'
+      - name: Execute tests
+        run: vendor/bin/phpunit
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_TEST_HOST }}
+          username: ${{ secrets.DEPLOY_TEST_USER }}
+          key: ${{ secrets.DEPLOY_TEST_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_TEST_PATH }}
+            git fetch origin
+            git reset --hard origin/develop
+            git pull origin develop
+
+            php artisan down
+
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+
+            php artisan migrate --force
+            php artisan route:cache
+            php artisan config:cache
+            php artisan optimize
+            php artisan queue:restart
+
+            php artisan up
+      - name: Notify via slack
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
