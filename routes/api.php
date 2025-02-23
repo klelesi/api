@@ -1,7 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware([StartSession::class])->group(function () {
+    Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirect'])->name('auth.redirect');
+    Route::get('/auth/{provider}/callback', [AuthController::class, 'callback'])->name('auth.callback');
+});
 
 Route::get('/posts/{id}', [\App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
 Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'feed'])->name('feed');
