@@ -5,11 +5,16 @@ namespace App\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Contracts\User;
 
 class AuthService
 {
-    public function tryToLogin(\Laravel\Socialite\Contracts\User $socialiteUser, Request $request)
+    public function tryToLogin(User $socialiteUser, Request $request)
     {
+        if(!$socialiteUser->getEmail()){
+            abort(400, "No valid emails associated with this account.");
+        }
+
         $user = \App\Models\User::where('email', $socialiteUser->getEmail())->first();
 
         if (!$user) {

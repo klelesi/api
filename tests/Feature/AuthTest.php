@@ -26,6 +26,14 @@ class AuthTest extends TestCase
         $response->assertRedirectContains('https://github.com/login/oauth/authorize');
     }
 
+    public function test_it_fails_if_a_provider_does_not_have_an_email(): void
+    {
+        $this->mockSocialiteUser('github', null);
+
+        $response = $this->get(route('auth.callback', ['provider' => 'github']));
+        $response->assertStatus(400);
+    }
+
     public function test_it_logins_a_new_user(): void
     {
         $this->mockSocialiteUser('github');
@@ -53,10 +61,10 @@ class AuthTest extends TestCase
         $response->assertRedirectContains(config('app.after_auth_redirect_url'));
     }
 
-    private function mockSocialiteUser(string $driver): void
+    private function mockSocialiteUser(string $driver, ?string $email = 'john.doe@example.com'): void
     {
         $socialiteUser = Mockery::mock(User::class);
-        $socialiteUser->shouldReceive('getEmail')->andReturn('john.doe@example.com');
+        $socialiteUser->shouldReceive('getEmail')->andReturn($email);
         $socialiteUser->shouldReceive('getName')->andReturn('John Doe');
 
         // Mock the Socialite driver
@@ -66,4 +74,6 @@ class AuthTest extends TestCase
         // Bind the mock to Socialite facade
         Socialite::shouldReceive('driver')->with($driver)->andReturn($provider);
     }
+
+
 }
