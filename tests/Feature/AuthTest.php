@@ -31,12 +31,12 @@ class AuthTest extends TestCase
         $this->mockSocialiteUser('github');
 
         $response = $this->get(route('auth.callback', ['provider' => 'github']));
-        $response->assertStatus(200);
+        $response->assertStatus(302);
 
         $this->assertDatabaseCount(\App\Models\User::class, 1);
         $this->assertDatabaseHas(\App\Models\User::class, ['email' => 'john.doe@example.com']);
 
-        $this->assertNotNull($response->json('data.token'));
+        $response->assertRedirectContains(config('app.after_auth_redirect_url'));
     }
 
     public function test_it_logins_an_existing_user(): void
@@ -45,12 +45,12 @@ class AuthTest extends TestCase
         \App\Models\User::factory()->createOne(['email' => 'john.doe@example.com']);
 
         $response = $this->get(route('auth.callback', ['provider' => 'github']));
-        $response->assertStatus(200);
+        $response->assertStatus(302);
 
         $this->assertDatabaseCount(\App\Models\User::class, 1);
         $this->assertDatabaseHas(\App\Models\User::class, ['email' => 'john.doe@example.com']);
 
-        $this->assertNotNull($response->json('data.token'));
+        $response->assertRedirectContains(config('app.after_auth_redirect_url'));
     }
 
     private function mockSocialiteUser(string $driver): void

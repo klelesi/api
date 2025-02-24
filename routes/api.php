@@ -1,19 +1,19 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Http\Request;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
-
-Route::middleware([StartSession::class])->group(function () {
-    Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirect'])->name('auth.redirect');
-    Route::get('/auth/{provider}/callback', [AuthController::class, 'callback'])->name('auth.callback');
-});
 
 Route::get('/posts/{id}', [\App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
 Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'feed'])->name('feed');
 
-Route::middleware(['auth:sanctum'])->group(function ($routes) {
+Route::middleware(['web'])->group(function () {
+    Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirect'])->name('auth.redirect');
+    Route::get('/auth/{provider}/callback', [AuthController::class, 'callback'])->name('auth.callback');
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
     Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('user.show');
     Route::put('/user', [\App\Http\Controllers\UserController::class, 'update'])->name('user.update');
 
