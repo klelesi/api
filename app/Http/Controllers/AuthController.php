@@ -11,8 +11,10 @@ use Laravel\Socialite\Two\User;
 
 class AuthController extends Controller
 {
-    public function redirect(string $provider)
+    public function redirect(string $provider, Request $request)
     {
+        $request->session()->regenerate();
+
         if (mb_strtolower($provider) === 'github') {
             return Socialite::driver('github')->redirect();
         }
@@ -31,13 +33,10 @@ class AuthController extends Controller
         abort(404);
     }
 
-    public function logout(Request $request)
+    public function logout(AuthService $authService, Request $request)
     {
-        Auth::logout();
+        $authService->logout($request);
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect(config('app.login_redirect_url'));
+        return response()->json();
     }
 }
