@@ -14,6 +14,8 @@ Route::middleware(['web'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/markdown', [\App\Http\Controllers\MarkdownController::class, 'preview'])->name('markdown.preview');
+
     Route::get('/user', [\App\Http\Controllers\UserController::class, 'show'])->name('user.show');
     Route::put('/user', [\App\Http\Controllers\UserController::class, 'update'])->name('user.update');
 
