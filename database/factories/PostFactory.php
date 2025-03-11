@@ -51,7 +51,7 @@ class PostFactory extends Factory
         return $this->state(function (array $attributes) {
             Link::create([
                 'linkable_id' => $attributes['id'],
-                'linkable_type' => Link::class,
+                'linkable_type' => Post::class,
                 'url' => $this->faker->url,
             ]);
 

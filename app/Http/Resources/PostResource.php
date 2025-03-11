@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\AuthorResource;
@@ -21,6 +22,15 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'numberOfComments' => $this->number_of_comments,
+            'html' => $this->when($this->post_type == Post::POST_TYPE_MARKDOWN, function () {
+                return $this->markdown->html;
+            }),
+            'url' => $this->when($this->post_type == Post::POST_TYPE_LINK, function () {
+                return $this->link->url;
+            }),
+            'urlMeta' => $this->when($this->post_type == Post::POST_TYPE_LINK, function () {
+                return $this->link->meta;
+            }),
             'author' => new AuthorResource($this->author),
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,

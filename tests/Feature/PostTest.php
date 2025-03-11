@@ -56,7 +56,7 @@ class PostTest extends TestCase
         $responseSlug = $this->getJson(route('posts.show', ['id' => $post->slug]))->assertStatus(200);
     }
 
-    public function test_it_returns_all_needed_properties_for_a_post()
+    public function test_it_returns_all_needed_properties_for_a_markdown_post()
     {
         $post = Post::factory()->markdownPost()->createOne();
 
@@ -67,8 +67,28 @@ class PostTest extends TestCase
         $this->assertSame($response->json('data.numberOfComments'), $post->number_of_comments);
         $this->assertSame($response->json('data.title'), $post->title);
         $this->assertSame($response->json('data.slug'), $post->slug);
+        $this->assertSame($response->json('data.html'), $post->markdown->html);
         $this->assertSame($response->json('data.author.id'), $post->author->id);
         $this->assertSame($response->json('data.author.name'), $post->author->name);
+        $this->assertNotNull($response->json('data.createdAt'));
+        $this->assertNotNull($response->json('data.updatedAt'));
+    }
+
+    public function test_it_returns_all_needed_properties_for_a_link_post()
+    {
+        $post = Post::factory()->linkPost()->createOne();
+
+        $response = $this->getJson(route('posts.show', ['id' => $post->id]))->assertStatus(200);
+
+        $this->assertSame($response->json('data.id'), $post->id);
+        $this->assertSame($response->json('data.postType'), $post->post_type);
+        $this->assertSame($response->json('data.numberOfComments'), $post->number_of_comments);
+        $this->assertSame($response->json('data.title'), $post->title);
+        $this->assertSame($response->json('data.slug'), $post->slug);
+        $this->assertSame($response->json('data.url'), $post->link->url);
+        $this->assertSame($response->json('data.author.id'), $post->author->id);
+        $this->assertSame($response->json('data.author.name'), $post->author->name);
+        $this->assertNotNull($response->json('data.urlMeta'));
         $this->assertNotNull($response->json('data.createdAt'));
         $this->assertNotNull($response->json('data.updatedAt'));
     }
