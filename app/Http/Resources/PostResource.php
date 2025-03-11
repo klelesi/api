@@ -28,6 +28,9 @@ class PostResource extends JsonResource
             'url' => $this->when($this->post_type == Post::POST_TYPE_LINK, function () {
                 return $this->link->url;
             }),
+            'urlHost' => $this->when($this->post_type == Post::POST_TYPE_LINK, function () {
+                return parse_url($this->link->url)['host'];
+            }),
             'urlMeta' => $this->when($this->post_type == Post::POST_TYPE_LINK, function () {
                 return $this->link->meta;
             }),
