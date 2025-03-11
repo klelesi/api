@@ -20,7 +20,7 @@ class PostResource extends JsonResource
             'id' => $this->id,
             'postType' => $this->post_type,
             'title' => $this->title,
-            'slug' => $this->slug,
+            'slug' => "/guna/{$this->slug}",
             'numberOfComments' => $this->number_of_comments,
             'html' => $this->when($this->post_type == Post::POST_TYPE_MARKDOWN, function () {
                 return $this->markdown->html;
