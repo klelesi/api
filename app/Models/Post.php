@@ -52,4 +52,31 @@ class Post extends Model
     {
         return $this->morphOne(Link::class, 'linkable');
     }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function nestedComments()
+    {
+        $map = [];
+        $tree = [];
+
+        $this->comments->each(function (Comment $comment) use (&$map) {
+            $map[$comment->id] = $comment;
+        });
+
+        foreach ($map as &$comment){
+            $parentId = $comment->parent_id;
+
+            if($parentId){
+                $map[$parentId]->comments[] = &$comment;
+            } else {
+                $tree[] = &$comment;
+            }
+        }
+
+        return collect($tree);
+    }
 }

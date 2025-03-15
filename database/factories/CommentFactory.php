@@ -35,7 +35,7 @@ class CommentFactory extends Factory
         return $this->afterCreating(function (Comment $comment) {
             $comment->markdown()->save(Markdown::create([
                 'markdownable_id' => $comment->id,
-                'markdownable_type' => Post::class,
+                'markdownable_type' => Comment::class,
                 'html' => $this->faker->randomHtml,
                 'markdown' => $this->faker->paragraphs(6, true),
             ]));
