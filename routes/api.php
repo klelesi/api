@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 Route::get('/posts/{id}', [\App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
 Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'feed'])->name('feed');
@@ -11,6 +12,8 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirect'])->name('auth.redirect');
     Route::get('/auth/{provider}/callback', [AuthController::class, 'callback'])->name('auth.callback');
+
+    Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
