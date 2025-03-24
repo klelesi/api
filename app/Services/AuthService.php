@@ -18,12 +18,7 @@ class AuthService
         $user = \App\Models\User::where('email', $socialiteUser->getEmail())->first();
 
         if (!$user) {
-            $user = \App\Models\User::create([
-                'name' => $socialiteUser->getName(),
-                'email' => $socialiteUser->getEmail(),
-                'email_verified_at' => now(),
-                'password' => bcrypt(Str::random(64)),
-            ]);
+            abort(400, "No registered user with this email address. Please register.");
         }
 
         $request->session()->regenerate();

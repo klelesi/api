@@ -34,17 +34,14 @@ class AuthTest extends TestCase
         $response->assertStatus(400);
     }
 
-    public function test_it_logins_a_new_user(): void
+    public function test_it_fails_if_user_does_not_exist(): void
     {
         $this->mockSocialiteUser('github');
 
         $response = $this->get(route('auth.callback', ['provider' => 'github']));
-        $response->assertStatus(302);
+        $response->assertStatus(400);
 
-        $this->assertDatabaseCount(\App\Models\User::class, 1);
-        $this->assertDatabaseHas(\App\Models\User::class, ['email' => 'john.doe@example.com']);
-
-        $response->assertRedirectContains(config('app.after_auth_redirect_url'));
+        $this->assertDatabaseCount(\App\Models\User::class, 0);
     }
 
     public function test_it_logins_an_existing_user(): void
