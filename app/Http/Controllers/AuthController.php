@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\User;
 
 class AuthController extends Controller
 {
