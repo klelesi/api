@@ -42,7 +42,7 @@ return [
     'email'                  => ':Attribute mora biti veljaven e-poštni naslov.',
     'ends_with'              => ':Attribute se mora končati z eno od naslednjih vrednosti: :values.',
     'enum'                   => 'Izbranih :attribute ni veljavnih.',
-    'exists'                 => 'izbran :attribute je neveljaven.',
+    'exists'                 => 'Izbran :attribute je neveljaven.',
     'extensions'             => 'Polje :attribute mora imeti eno od naslednjih končnic: :values.',
     'file'                   => ':Attribute mora biti datoteka.',
     'filled'                 => ':Attribute mora biti izpolnjen.',

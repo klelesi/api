@@ -6,6 +6,6 @@ return [
     'reset'     => 'Geslo je bilo spremenjeno!',
     'sent'      => 'Opomnik za geslo poslano!',
     'throttled' => 'Počakaj pred ponovnim poskusom.',
-    'token'     => 'Ponastavitveni žeton je neveljaven.',
+    'token'     => 'Ponastavitveni žeton je potekel. Prosim znova zahtevaj ponastvitev gesla.',
     'user'      => 'Uporabnik s tem emailom ne obstaja.',
 ];

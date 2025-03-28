@@ -43,9 +43,10 @@ class UserController extends Controller
             return new UserResource(Auth::user());
         }
 
-        return response()->json(['data' => [
-            'errors' => ['email' => ['Tole pa ni pravilno.']],
-        ]], 422);
+        return response()->json([
+            'message' => 'Tole pa ni pravilno.',
+            'errors' => ['password' => ['Tole pa ni pravilno.']],
+            ], 422);
     }
 
     public function passwordRequest(PasswordRequestRequest $request)
@@ -56,7 +57,7 @@ class UserController extends Controller
 
         return $status === Password::ResetLinkSent
             ? response()->json(['data' => null], 200)
-            : response()->json(['data' => ['email' => [__($status)]]], 400);
+            : response()->json(['errors' => ['email' => [__($status)]]], 400);
     }
 
     public function passwordReset(PasswordResetRequest $request)
@@ -78,7 +79,7 @@ class UserController extends Controller
 
         return $status === Password::PasswordReset
             ? response()->json(['data' => null], 200)
-            : response()->json(['data' => ['email' => [__($status)]]], 400);
+            : response()->json(['errors' => ['token' => [__($status)]]], 400);
     }
 
     public function show(Request $request)
