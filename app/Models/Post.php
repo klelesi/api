@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Request;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
@@ -58,6 +59,12 @@ class Post extends Model
         return $this->morphMany(Comment::class, 'commentable');
     }
 
+    public function interactions()
+    {
+        return $this->morphMany(UserInteraction::class, 'interactable')
+            ->where('user_id', '=', Request::user()->id);
+    }
+
     public function nestedComments()
     {
         $map = [];
@@ -67,10 +74,10 @@ class Post extends Model
             $map[$comment->id] = $comment;
         });
 
-        foreach ($map as &$comment){
+        foreach ($map as &$comment) {
             $parentId = $comment->parent_id;
 
-            if($parentId){
+            if ($parentId) {
                 $map[$parentId]->comments[] = &$comment;
             } else {
                 $tree[] = &$comment;

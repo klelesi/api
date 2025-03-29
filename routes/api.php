@@ -5,6 +5,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserInteractionController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -39,4 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/comments/{id}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{id}', [CommentController::class, 'delete'])->name('comments.delete');
     Route::post('/comments/{id}/restore', [CommentController::class, 'restore'])->name('comments.restore');
+
+    Route::post('/interactions', [UserInteractionController::class, 'store'])->name('interactions.store');
+    Route::get('/interactions/posts', [UserInteractionController::class, 'posts'])->name('interactions.posts');
 });

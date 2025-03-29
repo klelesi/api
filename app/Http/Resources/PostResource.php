@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Post;
+use App\Models\UserInteraction;
 use App\Services\LinkData;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -40,6 +41,9 @@ class PostResource extends JsonResource
             }),
             'author' => new AuthorResource($this->author),
             'comments' => CommentResource::collection($this->nestedComments()),
+            'interactions' => $this->whenLoaded('interactions', function () {
+                return UserInteractionResource::collection($this->interactions);
+            }),
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
         ];

@@ -8,9 +8,17 @@ use Illuminate\Http\Request;
 
 class FeedController extends Controller
 {
-    public function feed()
+    public function feed(Request $request)
     {
-        $posts = Post::orderBy('created_at', 'DESC')->cursorPaginate(50);
+        $query = Post::query()
+            ->orderBy('created_at', 'DESC');
+
+        $with = ['author', 'markdown', 'link'];
+        if ($request->user()) {
+            $with[] = 'interactions';
+        }
+
+        $posts = $query->with($with)->cursorPaginate(50);
 
         return PostResource::collection($posts);
     }

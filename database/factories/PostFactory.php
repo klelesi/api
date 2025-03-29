@@ -26,7 +26,7 @@ class PostFactory extends Factory
             'title' => $this->faker->sentence(),
             'number_of_comments' => 0,
             'author_id' => User::factory(),
-            'created_at' => $this->faker->dateTimeBetween('-3 months', '3 months'),
+            'created_at' => $this->faker->dateTimeBetween('-3 months', '-1 week'),
         ];
     }
 
