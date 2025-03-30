@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserInteractionController;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,7 @@ use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 Route::get('/posts/{id}', [PostController::class, 'show'])->name('posts.show');
 Route::get('/feed', [FeedController::class, 'feed'])->name('feed');
+Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
 
 Route::middleware(['web'])->group(function () {
     Route::post('/auth/register', [UserController::class, 'register'])->name('register');

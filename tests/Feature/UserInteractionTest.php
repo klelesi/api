@@ -12,7 +12,6 @@ class UserInteractionTest extends TestCase
 {
     use RefreshDatabase;
 
-
     public function test_it_stores_a_view_interaction(): void
     {
         $user = User::factory()->create();
