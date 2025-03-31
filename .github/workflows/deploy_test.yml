@@ -38,28 +38,10 @@ jobs:
     needs: test
     steps:
       - name: Deploy
-        uses: appleboy/ssh-action@v0.1.10
+        uses: fjogeleit/http-request-action@v1
         with:
-          host: ${{ secrets.DEPLOY_TEST_HOST }}
-          username: ${{ secrets.DEPLOY_TEST_USER }}
-          key: ${{ secrets.DEPLOY_TEST_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_TEST_PATH }}
-            git fetch origin
-            git reset --hard origin/develop
-            git pull origin develop
-
-            php artisan down
-
-            composer install --no-interaction --prefer-dist --optimize-autoloader
-
-            php artisan migrate --force
-            php artisan route:cache
-            php artisan config:cache
-            php artisan optimize
-            php artisan queue:restart
-
-            php artisan up
+          url: ${{ secrets.DEPLOY_TRIGGER_URL }}
+          method: 'POST'
       - name: Notify via slack
         uses: rtCamp/action-slack-notify@v2
         env:
