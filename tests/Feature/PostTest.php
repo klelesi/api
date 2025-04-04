@@ -83,6 +83,7 @@ class PostTest extends TestCase
         $this->assertSame($response->json('data.html'), $post->markdown->html);
         $this->assertSame($response->json('data.author.id'), $post->author->id);
         $this->assertSame($response->json('data.author.name'), $post->author->name);
+        $this->assertNull($response->json('data.lockedAt'));
         $this->assertNotNull($response->json('data.createdAt'));
         $this->assertNotNull($response->json('data.updatedAt'));
     }
@@ -102,6 +103,7 @@ class PostTest extends TestCase
         $this->assertSame($response->json('data.author.id'), $post->author->id);
         $this->assertSame($response->json('data.author.name'), $post->author->name);
         $this->assertNotNull($response->json('data.urlMeta'));
+        $this->assertNull($response->json('data.lockedAt'));
         $this->assertNotNull($response->json('data.createdAt'));
         $this->assertNotNull($response->json('data.updatedAt'));
     }
@@ -204,5 +206,16 @@ class PostTest extends TestCase
 
         $this->assertCount(2, $response->json('data.comments'));
         $this->assertCount(1, $response->json('data.comments')[0]['comments']);
+    }
+
+    public function test_it_prevents_updates_to_a_locked_post()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->markdownPost()->createOne(['author_id' => $user->id, 'locked_at' => Carbon::now()]);
+
+        $data = ['title' => 'Example', 'markdown' => '#Hello'];
+
+        $response = $this->actingAs($user, 'sanctum')->putJson(route('posts.update', ['id' => $post->id]), $data)
+            ->assertStatus(400);
     }
 }

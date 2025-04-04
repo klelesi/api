@@ -109,7 +109,7 @@ class CommentTest extends TestCase
         $this->assertNotSoftDeleted(Comment::class, ['id' => $comment->id]);
     }
 
-    public function test_only_the_author_can_update_a_post()
+    public function test_only_the_author_can_update_a_comment()
     {
         $imposter = User::factory()->createOne();
         $comment = Comment::factory()->createOne();
@@ -120,7 +120,7 @@ class CommentTest extends TestCase
             $comment->id]), $data)->assertStatus(403);
     }
 
-    public function test_only_the_author_can_delete_a_post()
+    public function test_only_the_author_can_delete_a_comment()
     {
         $imposter = User::factory()->createOne();
         $comment = Comment::factory()->createOne();
@@ -129,12 +129,87 @@ class CommentTest extends TestCase
             $comment->id]))->assertStatus(403);
     }
 
-    public function test_only_the_author_can_restore_a_post()
+    public function test_only_the_author_can_restore_a_comment()
     {
         $imposter = User::factory()->createOne();
         $comment = Comment::factory()->createOne(['deleted_at' => Carbon::now()]);
 
         $response = $this->actingAs($imposter, 'sanctum')->postJson(route('comments.restore', ['id' =>
             $comment->id]))->assertStatus(403);
+    }
+
+    public function test_it_prevents_storing_a_comment_to_a_locked_post()
+    {
+        $user = User::factory()->createOne();
+        $post = Post::factory()->markdownPost()->createOne(['locked_at' => Carbon::now()]);
+
+        $data = ['markdown' => '#Hello', 'postId' => $post->id];
+
+        $response = $this->actingAs($user, 'sanctum')->postJson(route('comments.store'), $data)->assertStatus(400);
+    }
+
+    public function test_it_prevents_updating_a_comment_to_a_locked_post()
+    {
+        $comment = Comment::factory()->createOne();
+        $post = $comment->commentable;
+        $post->locked_at = Carbon::now();
+        $post->save();
+
+        $data = ['markdown' => '#Hello'];
+
+        $response = $this->actingAs($comment->author, 'sanctum')->putJson(route('comments.update', ['id' =>
+            $comment->id]), $data)
+            ->assertStatus
+            (400);
+        $commentId = $response->json('data.id');
+    }
+
+    public function test_it_prevents_storing_a_nested_comment_to_a_locked_comment()
+    {
+        $user = User::factory()->createOne();
+        $comment = Comment::factory()->createOne(['locked_at' => Carbon::now()]);
+
+        $data = ['markdown' => '#Hello', 'postId' => $comment->commentable_id, 'parentId' => $comment->id];
+
+        $response = $this->actingAs($user, 'sanctum')->postJson(route('comments.store'), $data)->assertStatus(400);
+    }
+
+    public function test_it_prevents_updating_a_locked_comment()
+    {
+        $comment = Comment::factory()->createOne(['locked_at' => Carbon::now()]);
+
+        $data = ['markdown' => '#Hello'];
+
+        $response = $this->actingAs($comment->author, 'sanctum')->putJson(route('comments.update', ['id' =>
+            $comment->id]), $data)
+            ->assertStatus
+            (400);
+    }
+
+    public function test_it_prevents_storing_a_sub_nested_comment_to_a_locked_comment()
+    {
+        $user = User::factory()->createOne();
+        $comment = Comment::factory()->createOne();
+        $commentLocked = Comment::factory()->createOne(['commentable_id' => $comment->commentable_id, 'parent_id' =>
+            $comment->id, 'locked_at' => Carbon::now()]);
+
+        $data = ['markdown' => '#Hello', 'postId' => $comment->commentable_id, 'parentId' => $commentLocked->id];
+
+        $response = $this->actingAs($user, 'sanctum')->postJson(route('comments.store'), $data)->assertStatus(400);
+    }
+
+    public function test_it_prevents_updating_a_sub_nested_comment_to_a_locked_comment()
+    {
+        $comment = Comment::factory()->createOne();
+        $commentLocked = Comment::factory()->createOne(['commentable_id' => $comment->commentable_id, 'parent_id' =>
+            $comment->id, 'locked_at' => Carbon::now()]);
+        $commentSub = Comment::factory()->createOne(['commentable_id' => $comment->commentable_id, 'parent_id' =>
+            $commentLocked->id, 'locked_at' => null]);
+
+        $data = ['markdown' => '#Hello', 'postId' => $comment->commentable_id, 'parentId' => $commentLocked->id];
+
+        $response = $this->actingAs($commentSub->author, 'sanctum')->putJson(route('comments.update', ['id' =>
+            $commentSub->id]), $data)
+            ->assertStatus(400);
     }
 }

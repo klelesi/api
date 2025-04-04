@@ -27,4 +27,13 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class, 'author_id');
     }
+
+    public function commentable(){
+        return $this->morphTo();
+    }
+
+    public function isLocked()
+    {
+        return $this->locked_at !== null;
+    }
 }

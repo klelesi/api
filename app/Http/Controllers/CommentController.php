@@ -8,6 +8,7 @@ use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class CommentController extends Controller
 {
@@ -15,8 +16,24 @@ class CommentController extends Controller
     {
         $postId = $request->validated('postId');
 
-        if($parentId = $request->validated('parentId') ?? null){
-           $postId = Comment::where('id', $parentId)->first()->commentable_id ?? $postId;
+        if ($parentId = $request->validated('parentId') ?? null) {
+            $postId = Comment::where('id', $parentId)->first()->commentable_id ?? $postId;
+        }
+
+        $post = Post::with('comments')->where('id', $postId)->firstOrFail();
+
+        if ($post->isLocked()) {
+            abort(400);
+        }
+
+        if ($parentId) {
+            $ancestors = $this->getAncestors($parentId, $post->comments);
+
+            foreach ($ancestors as $ancestor) {
+                if ($ancestor->isLocked()) {
+                    abort(400);
+                }
+            }
         }
 
         $comment = Comment::create([
@@ -31,7 +48,7 @@ class CommentController extends Controller
             'html' => $this->parseMarkdown($request->validated('markdown')),
         ]);
 
-        Post::where('id', $postId)->increment('number_of_comments');
+        $post->increment('number_of_comments');
 
         return new CommentResource($comment);
     }
@@ -42,6 +59,22 @@ class CommentController extends Controller
 
         if ($request->user()->cannot('update', $comment)) {
             abort(403);
+        }
+
+        $post = $comment->commentable;
+
+        if ($post->isLocked() || $comment->isLocked()) {
+            abort(400);
+        }
+
+        if ($comment->parent_id) {
+            $ancestors = $this->getAncestors($comment->parent_id, $post->comments);
+
+            foreach ($ancestors as $ancestor) {
+                if ($ancestor->isLocked()) {
+                    abort(400);
+                }
+            }
         }
 
         $comment->markdown()->update([
@@ -77,5 +110,28 @@ class CommentController extends Controller
         $comment->restore();
 
         return new CommentResource($comment->refresh());
+    }
+
+    private function getAncestors(string $currentId, Collection $comments): array
+    {
+        $map = [];
+
+        foreach ($comments as $comment) {
+            $map[$comment->id] = $comment;
+        }
+
+        $ancestors = [];
+
+        if (isset($map[$currentId])) {
+            $comment = $map[$currentId];
+            $ancestors[] = $comment;
+
+            while ($comment->parent_id && isset($map[$comment->parent_id])) {
+                $comment = $map[$comment->parent_id];
+                $ancestors[] = $comment;
+            }
+        }
+
+        return $ancestors;
     }
 }

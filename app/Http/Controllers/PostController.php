@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function __construct(private LinkService $linkService)
+    public function __construct(private readonly LinkService $linkService)
     {
     }
 
@@ -36,6 +36,10 @@ class PostController extends Controller
 
         if ($request->user()->cannot('update', $post)) {
             abort(403);
+        }
+
+        if ($post->isLocked()) {
+            abort(400);
         }
 
         switch ($post->post_type) {

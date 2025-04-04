@@ -39,6 +39,11 @@ class Post extends Model
             ->slugsShouldBeNoLongerThan(240);
     }
 
+    public function isLocked()
+    {
+        return $this->locked_at !== null;
+    }
+
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id', 'id');
