@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\WelcomeNotification;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -154,5 +155,19 @@ class UserTest extends TestCase
         $response->assertStatus(200);
 
         $this->assertDatabaseHas(User::class, ['name' => 'Example name']);
+    }
+
+    public function test_it_returns_permissions(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $user = User::factory()->moderator()->createOne();
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->getJson(route('user.permissions'));
+
+        $response->assertStatus(200);
+        $this->assertNotEmpty($response->json('data.permissions'));
+        $this->assertNotEmpty($response->json('data.roles'));
     }
 }

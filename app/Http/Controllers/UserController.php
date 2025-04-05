@@ -46,7 +46,7 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Tole pa ni pravilno.',
             'errors' => ['password' => ['Tole pa ni pravilno.']],
-            ], 422);
+        ], 422);
     }
 
     public function passwordRequest(PasswordRequestRequest $request)
@@ -95,5 +95,17 @@ class UserController extends Controller
         $user->update();
 
         return new UserResource($user->refresh());
+    }
+
+    public function permissions(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json(['data' => [
+            'permissions' => $user->getAllPermissions()->map(function ($item) {
+                return $item->name;
+            }),
+            'roles' => $user->getRoleNames(),
+        ]]);
     }
 }

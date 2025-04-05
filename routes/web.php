@@ -26,6 +26,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/markdown', [\App\Http\Controllers\MarkdownController::class, 'preview'])->name('markdown.preview');
 
     Route::get('/user', [UserController::class, 'show'])->name('user.show');
+    Route::get('/user/permissions', [UserController::class, 'permissions'])->name('user.permissions');
     Route::put('/user', [UserController::class, 'update'])->name('user.update');
 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
