@@ -263,4 +263,30 @@ class PostTest extends TestCase
         $this->assertDatabaseHas('posts', ['title' => $data['title']]);
         $this->assertDatabaseHas('markdowns', ['html' => '<h1>Hello</h1>']);
     }
+
+    public function test_a_moderator_locks_a_post()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $post = Post::factory()->markdownPost()->createOne([]);
+
+        $response = $this->actingAs($moderator, 'sanctum')->postJson(route('posts.lock', ['id' => $post->id]))
+            ->assertStatus(200);
+
+        $this->assertTrue($post->refresh()->isLocked());
+    }
+
+    public function test_a_moderator_unlocks_a_post()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $post = Post::factory()->markdownPost()->createOne(['locked_at' => Carbon::now()]);
+
+        $response = $this->actingAs($moderator, 'sanctum')->postJson(route('posts.unlock', ['id' => $post->id]))
+            ->assertStatus(200);
+
+        $this->assertFalse($post->refresh()->isLocked());
+    }
 }

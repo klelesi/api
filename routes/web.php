@@ -33,11 +33,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'delete'])->name('posts.delete');
     Route::post('/posts/{id}/restore', [PostController::class, 'restore'])->name('posts.restore');
+    Route::post('/posts/{id}/lock', [PostController::class, 'lock'])->name('posts.lock');
+    Route::post('/posts/{id}/unlock', [PostController::class, 'unlock'])->name('posts.unlock');
 
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::put('/comments/{id}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{id}', [CommentController::class, 'delete'])->name('comments.delete');
     Route::post('/comments/{id}/restore', [CommentController::class, 'restore'])->name('comments.restore');
+    Route::post('/comments/{id}/lock', [CommentController::class, 'lock'])->name('comments.lock');
+    Route::post('/comments/{id}/unlock', [CommentController::class, 'unlock'])->name('comments.unlock');
 
     Route::post('/interactions', [UserInteractionController::class, 'store'])->name('interactions.store');
     Route::get('/interactions/posts', [UserInteractionController::class, 'posts'])->name('interactions.posts');

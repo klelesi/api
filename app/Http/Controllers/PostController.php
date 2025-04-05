@@ -8,6 +8,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\LinkService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -83,6 +84,34 @@ class PostController extends Controller
         }
 
         $post->restore();
+
+        return new PostResource($post->refresh());
+    }
+
+    public function lock(string $id, Request $request)
+    {
+        $post = Post::findOrFail($id);
+
+        if ($request->user()->cannot('lock content', $post)) {
+            abort(403);
+        }
+
+        $post->locked_at = Carbon::now();
+        $post->save();
+
+        return new PostResource($post->refresh());
+    }
+
+    public function unlock(string $id, Request $request)
+    {
+        $post = Post::findOrFail($id);
+
+        if ($request->user()->cannot('lock content', $post)) {
+            abort(403);
+        }
+
+        $post->locked_at = null;
+        $post->save();
 
         return new PostResource($post->refresh());
     }

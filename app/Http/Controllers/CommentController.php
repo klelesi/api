@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -108,6 +109,34 @@ class CommentController extends Controller
         }
 
         $comment->restore();
+
+        return new CommentResource($comment->refresh());
+    }
+
+    public function lock(string $id, Request $request)
+    {
+        $comment = Comment::findOrFail($id);
+
+        if ($request->user()->cannot('lock content', $comment)) {
+            abort(403);
+        }
+
+        $comment->locked_at = Carbon::now();
+        $comment->save();
+
+        return new CommentResource($comment->refresh());
+    }
+
+    public function unlock(string $id, Request $request)
+    {
+        $comment = Comment::findOrFail($id);
+
+        if ($request->user()->cannot('lock content', $comment)) {
+            abort(403);
+        }
+
+        $comment->locked_at = null;
+        $comment->save();
 
         return new CommentResource($comment->refresh());
     }

@@ -253,4 +253,30 @@ class CommentTest extends TestCase
 
         $this->assertDatabaseHas('markdowns', ['markdownable_id' => $commentId, 'html' => '<h1>Hello</h1>']);
     }
+
+    public function test_a_moderator_locks_a_comment()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $comment = Comment::factory()->createOne();
+
+        $response = $this->actingAs($moderator, 'sanctum')->postJson(route('comments.lock', ['id' => $comment->id]))
+            ->assertStatus(200);
+
+        $this->assertTrue($comment->refresh()->isLocked());
+    }
+
+    public function test_a_moderator_unlocks_a_comment()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $comment = Comment::factory()->createOne(['locked_at' => Carbon::now()]);
+
+        $response = $this->actingAs($moderator, 'sanctum')->postJson(route('comments.unlock', ['id' => $comment->id]))
+            ->assertStatus(200);
+
+        $this->assertFalse($comment->refresh()->isLocked());
+    }
 }
