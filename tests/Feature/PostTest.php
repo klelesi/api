@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\LinkData;
 use App\Services\LinkService;
 use Carbon\Carbon;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Mockery;
@@ -16,6 +17,15 @@ use Tests\TestCase;
 class PostTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        // first include all the normal setUp operations
+        parent::setUp();
+
+        // now de-register all the roles and permissions by clearing the permission cache
+        $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+    }
 
     public function test_it_stores_a_markdown_post()
     {
@@ -217,5 +227,49 @@ class PostTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')->putJson(route('posts.update', ['id' => $post->id]), $data)
             ->assertStatus(400);
+    }
+
+    public function test_a_moderator_deletes_a_post()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $post = Post::factory()->markdownPost()->createOne([]);
+
+        $response = $this->actingAs($moderator, 'sanctum')->deleteJson(route('posts.delete', ['id' => $post->id]))
+            ->assertStatus(200);
+
+        $this->assertSoftDeleted('posts', ['id' => $post->id]);
+    }
+
+    public function test_a_moderator_restores_a_post()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $post = Post::factory()->markdownPost()->createOne(['deleted_at' => Carbon::now()]);
+
+        $this->assertSoftDeleted('posts', ['id' => $post->id]);
+
+        $response = $this->actingAs($moderator, 'sanctum')->postJson(route('posts.restore', ['id' => $post->id]))
+            ->assertStatus(200);
+
+        $this->assertNotSoftDeleted('posts', ['id' => $post->id]);
+    }
+
+    public function test_a_moderator_can_update_a_markdown_post()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $post = Post::factory()->markdownPost()->createOne([]);
+
+        $data = ['title' => 'Example', 'markdown' => '#Hello'];
+
+        $response = $this->actingAs($moderator, 'sanctum')->putJson(route('posts.update', ['id' => $post->id]), $data)
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('posts', ['title' => $data['title']]);
+        $this->assertDatabaseHas('markdowns', ['html' => '<h1>Hello</h1>']);
     }
 }

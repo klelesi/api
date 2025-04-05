@@ -5,12 +5,22 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CommentTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        // first include all the normal setUp operations
+        parent::setUp();
+
+        // now de-register all the roles and permissions by clearing the permission cache
+        $this->app->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+    }
 
     public function test_it_stores_a_comment()
     {
@@ -211,5 +221,45 @@ class CommentTest extends TestCase
         $response = $this->actingAs($commentSub->author, 'sanctum')->putJson(route('comments.update', ['id' =>
             $commentSub->id]), $data)
             ->assertStatus(400);
+    }
+
+    public function test_a_moderator_can_delete_a_comment()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $comment = Comment::factory()->createOne();
+
+        $response = $this->actingAs($moderator, 'sanctum')->deleteJson(route('comments.update', ['id' =>
+            $comment->id]))->assertStatus(200);
+    }
+
+    public function test_a_moderator_can_restore_a_comment()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $comment = Comment::factory()->createOne(['deleted_at' => Carbon::now()]);
+
+        $response = $this->actingAs($moderator, 'sanctum')->postJson(route('comments.restore', ['id' =>
+            $comment->id]))->assertStatus(200);
+    }
+
+    public function test_a_moderator_can_update_a_comment()
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $moderator = User::factory()->moderator()->createOne();
+        $comment = Comment::factory()->createOne();
+
+        $data = ['markdown' => '#Hello'];
+
+        $response = $this->actingAs($moderator, 'sanctum')->putJson(route('comments.update', ['id' =>
+            $comment->id]), $data)
+            ->assertStatus
+            (200);
+        $commentId = $response->json('data.id');
+
+        $this->assertDatabaseHas('markdowns', ['markdownable_id' => $commentId, 'html' => '<h1>Hello</h1>']);
     }
 }

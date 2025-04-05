@@ -12,7 +12,11 @@ class CommentPolicy
      */
     public function update(User $user, Comment $comment): bool
     {
-        return $comment->author_id === $user->id;
+        if ($comment->author_id === $user->id) {
+            return true;
+        }
+
+        return $user->can('moderate content', $comment);
     }
 
     /**
@@ -20,7 +24,11 @@ class CommentPolicy
      */
     public function delete(User $user, Comment $comment): bool
     {
-        return $comment->author_id === $user->id;
+        if ($comment->author_id === $user->id) {
+            return true;
+        }
+
+        return $user->can('delete content', $comment);
     }
 
     /**
@@ -28,6 +36,10 @@ class CommentPolicy
      */
     public function restore(User $user, Comment $comment): bool
     {
-        return $comment->author_id === $user->id;
+        if ($comment->author_id === $user->id) {
+            return true;
+        }
+
+        return $user->can('delete content', $comment);
     }
 }
