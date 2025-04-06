@@ -289,4 +289,16 @@ class PostTest extends TestCase
 
         $this->assertFalse($post->refresh()->isLocked());
     }
+
+    public function test_it_fetches_a_deleted_comments()
+    {
+        $post = Post::factory()->markdownPost()->createOne();
+        $comment1 = Comment::factory()->createOne(['commentable_id' => $post->id, 'commentable_type' => Post::class]);
+        $comment2 = Comment::factory()->createOne(['commentable_id' => $post->id, 'commentable_type' => Post::class, 'deleted_at' => Carbon::now()]);
+        $comment3 = Comment::factory()->createOne(['commentable_id' => $post->id, 'commentable_type' => Post::class]);
+
+        $response = $this->getJson(route('posts.show', ['id' => $post->id]))->assertStatus(200);
+
+        $this->assertCount(3, $response->json('data.comments'));
+    }
 }

@@ -61,7 +61,7 @@ class Post extends Model
 
     public function comments()
     {
-        return $this->morphMany(Comment::class, 'commentable');
+        return $this->morphMany(Comment::class, 'commentable')->withTrashed();
     }
 
     public function interactions()
@@ -89,6 +89,20 @@ class Post extends Model
             }
         }
 
+        $this->resolveLockedStatus($tree, $this->locked_at);
+
         return collect($tree);
+    }
+
+    private function resolveLockedStatus(array $comments, string $locked_at = null)
+    {
+        foreach ($comments as $comment) {
+            if($locked_at){
+                $comment->locked_at = $locked_at;
+            }
+            $this->resolveLockedStatus($comment->comments, $comment->locked_at);
+        }
+
+        return $comments;
     }
 }

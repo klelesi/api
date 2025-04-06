@@ -14,15 +14,19 @@ class CommentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+
         return [
             'id' => $this->id,
             'parentId' => $this->parent_id,
             'author' => new AuthorResource($this->author),
-            'html' => $this->markdown->html,
-            'markdown' => $this->markdown->markdown,
+            'html' => $this->when($this->deleted_at === null, $this->markdown->html, __('content.deleted_comment')),
+            'markdown' => $this->when($this->deleted_at === null, $this->markdown->markdown, __('content.deleted_comment')),
             'comments'=> CommentResource::collection(collect($this->comments)),
+            'lockedAt' => $this->locked_at,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
+            'deletedAt' => $this->deleted_at,
         ];
     }
 }

@@ -279,4 +279,49 @@ class CommentTest extends TestCase
 
         $this->assertFalse($comment->refresh()->isLocked());
     }
+
+    public function test_it_hides_content_for_a_deleted_comment()
+    {
+        $comment = Comment::factory()->createOne(['deleted_at' => Carbon::now()]);
+
+        $response = $this->getJson(route('posts.show', ['id' =>
+            $comment->commentable_id]))->assertStatus(200);
+
+        $comments = $response->json('data.comments');
+
+        $this->assertSame(__('content.deleted_comment'), $comments[0]['html']);
+        $this->assertSame(__('content.deleted_comment'), $comments[0]['markdown']);
+    }
+
+    public function test_it_returns_a_locked_comment_if_the_post_is_locked()
+    {
+        $post = Post::factory()->markdownPost()->createOne(['locked_at' => Carbon::now()]);
+        $comment = Comment::factory()->createOne(['commentable_id' => $post->id]);
+
+        $response = $this->getJson(route('posts.show', ['id' =>
+            $comment->commentable_id]))->assertStatus(200);
+
+        $comments = $response->json('data.comments');
+
+        $this->assertNotNull($comments[0]['lockedAt']);
+    }
+
+    public function test_it_returns_a_locked_comment_if_the_parent_is_locked()
+    {
+        $post = Post::factory()->markdownPost()->createOne();
+        $comment0 = Comment::factory()->createOne(['commentable_id' => $post->id]);
+        $comment1 = Comment::factory()->createOne(['commentable_id' => $post->id]);
+        $comment2 = Comment::factory()->createOne(['commentable_id' => $post->id, 'parent_id' => $comment1->id, 'locked_at' => Carbon::now()]);
+        $comment3 = Comment::factory()->createOne(['commentable_id' => $post->id, 'parent_id' => $comment2->id]);
+
+        $response = $this->getJson(route('posts.show', ['id' =>
+            $post->id]))->assertStatus(200);
+
+        $comments = $response->json('data.comments');
+
+        $this->assertNull($comments[0]['lockedAt']);
+        $this->assertNull($comments[1]['lockedAt']);
+        $this->assertNotNull($comments[1]['comments'][0]['lockedAt']);
+        $this->assertNotNull($comments[1]['comments'][0]['comments'][0]['lockedAt']);
+    }
 }
