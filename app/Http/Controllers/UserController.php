@@ -25,6 +25,7 @@ class UserController extends Controller
             'name' => $request->validated('name'),
             'email' => $request->validated('email'),
             'password' => bcrypt($request->validated('name')),
+            'username' => $request->validated('username'),
         ]);
 
         $request->session()->regenerate();

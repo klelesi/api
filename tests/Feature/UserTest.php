@@ -23,6 +23,7 @@ class UserTest extends TestCase
         $data = [
             'name' => 'John Doe',
             'email' => 'john.doe@example.com',
+            'username' => 'john.doe',
             'password' => 'password',
         ];
 
@@ -30,7 +31,7 @@ class UserTest extends TestCase
 
         $response->assertStatus(201);
 
-        $this->assertDatabaseHas(User::class, ['name' => $data['name'], 'email' => $data['email'], 'email_verified_at' => null]);
+        $this->assertDatabaseHas(User::class, ['name' => $data['name'], 'email' => $data['email'], 'username' => $data['username'], 'email_verified_at' => null]);
 
         $user = User::where('email', $data['email'])->first();
         Notification::assertSentTo($user, WelcomeNotification::class);
@@ -44,6 +45,7 @@ class UserTest extends TestCase
         $data = [
             'name' => 'John Doe',
             'email' => $user->email,
+            'username' => $user->username,
             'password' => 'password',
         ];
 
@@ -142,6 +144,7 @@ class UserTest extends TestCase
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'username' => $user->username,
             ]]);
     }
 
