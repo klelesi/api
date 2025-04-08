@@ -147,7 +147,7 @@ return [
     'string'                 => ':Attribute mora biti tekst.',
     'timezone'               => ':Attribute mora biti časovna cona.',
     'ulid'                   => ':Attribute mora biti veljaven ULID.',
-    'unique'                 => ':Attribute je že zaseden.',
+    'unique'                 => 'Tole je že zasedeno.',
     'uploaded'               => 'Nalaganje :attribute ni uspelo.',
     'uppercase'              => ':Attribute mora biti z velikimi črkami.',
     'url'                    => ':Attribute format je neveljaven.',
