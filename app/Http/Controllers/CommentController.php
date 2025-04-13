@@ -10,6 +10,7 @@ use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class CommentController extends Controller
 {
@@ -50,6 +51,8 @@ class CommentController extends Controller
         ]);
 
         $post->increment('number_of_comments');
+
+        SlackAlert::message(":tada: Nov komentar! :tada: Prispevek: {$post->slug}");
 
         return new CommentResource($comment);
     }

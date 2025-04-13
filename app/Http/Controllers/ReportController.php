@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class ReportController extends Controller
 {
@@ -26,6 +27,10 @@ class ReportController extends Controller
         }
 
         Report::create($data);
+        SlackAlert::message("Nova prijava vsebine!
+        Razlog: {$request->validated('comment')}
+        Prispevek: {$request->validated('postId')}
+        Komentar: {$request->validated('commentId')}");
 
         return response()->json(['data' => null]);
     }

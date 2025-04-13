@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\LinkService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class PostController extends Controller
 {
@@ -27,6 +28,8 @@ class PostController extends Controller
                 $post = $this->createLinkPost($request->validated(), $request->user('sanctum'));
                 break;
         }
+
+        SlackAlert::message(":tada: Nov prispevek! :tada: Prispevek: {$post->slug}");
 
         return new PostResource($post->refresh());
     }

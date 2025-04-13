@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.9",
         "socialiteproviders/github": "^4.1",
         "spatie/laravel-permission": "^6.16",
+        "spatie/laravel-slack-alerts": "^1.7",
         "spatie/laravel-sluggable": "^3.7",
         "spekulatius/phpscraper": "^3.0"
     },

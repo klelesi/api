@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class UserController extends Controller
 {
@@ -32,6 +33,7 @@ class UserController extends Controller
         Auth::login($user);
 
         $user->notify(new WelcomeNotification());
+        SlackAlert::message(":tada: Nov uporabnik! :tada:");
 
         return new UserResource($user);
     }
