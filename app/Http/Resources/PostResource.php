@@ -40,7 +40,11 @@ class PostResource extends JsonResource
                 return $this->link->meta ?? new LinkData("");
             }),
             'author' => new AuthorResource($this->author),
-            'comments' => CommentResource::collection($this->nestedComments()),
+            'comments' => $this->whenLoaded('comments',
+                function () {
+                    return CommentResource::collection($this->nestedComments());
+                }
+            ),
             'interactions' => $this->whenLoaded('interactions', function () {
                 return UserInteractionResource::collection($this->interactions);
             }),

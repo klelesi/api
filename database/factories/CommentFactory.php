@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\CustomParsedown;
 use App\Models\Comment;
 use App\Models\Markdown;
 use App\Models\Post;
@@ -33,11 +34,14 @@ class CommentFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Comment $comment) {
+            $markdown = $this->faker->paragraphs(6, true);
+            $html = (new CustomParsedown())->setSafeMode(true)->text($markdown);
+
             $comment->markdown()->save(Markdown::create([
                 'markdownable_id' => $comment->id,
                 'markdownable_type' => Comment::class,
-                'html' => $this->faker->randomHtml,
-                'markdown' => $this->faker->paragraphs(6, true),
+                'html' => $html,
+                'markdown' => $markdown,
             ]));
         });
     }

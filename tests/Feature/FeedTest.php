@@ -24,6 +24,15 @@ class FeedTest extends TestCase
         $this->assertNotNull($response->json('meta'));
     }
 
+    public function test_it_doesnt_fetch_comments()
+    {
+        $posts = Post::factory()->markdownPost()->count(100)->create();
+
+        $response = $this->getJson(route('feed'))->assertStatus(200);
+
+        $this->assertFalse(isset($response->json('data')[0]['comments']));
+    }
+
     public function test_it_fetches_an_ordered_paginated_feed()
     {
         $count = 50;

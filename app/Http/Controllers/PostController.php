@@ -73,7 +73,9 @@ class PostController extends Controller
 
     public function show(string $id)
     {
-        $post = Post::where('id', $id)->orWhere('slug', $id)->firstOrFail();
+        $post = Post::where('id', $id)->orWhere('slug', $id)
+            ->with(['comments', 'author'])
+            ->firstOrFail();
 
         return new PostResource($post);
     }

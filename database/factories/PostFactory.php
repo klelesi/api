@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\CustomParsedown;
 use App\Models\Link;
 use App\Models\Markdown;
 use App\Models\Post;
@@ -32,12 +33,16 @@ class PostFactory extends Factory
 
     public function markdownPost()
     {
+
         return $this->state(function (array $attributes) {
+            $markdown = $this->faker->paragraphs(6, true);
+            $html = (new CustomParsedown())->setSafeMode(true)->text($markdown);
+
             Markdown::create([
                 'markdownable_id' => $attributes['id'],
                 'markdownable_type' => Post::class,
-                'html' => $this->faker->randomHtml,
-                'markdown' => $this->faker->paragraphs(6, true),
+                'html' => $html,
+                'markdown' => $markdown,
             ]);
 
             return [
