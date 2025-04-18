@@ -27,6 +27,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/user', [UserController::class, 'show'])->name('user.show');
     Route::get('/user/permissions', [UserController::class, 'permissions'])->name('user.permissions');
+    Route::get('/user/notifications', [UserController::class, 'notifications'])->name('user.notifications');
+    Route::post('/user/notifications', [UserController::class, 'readNotification']);
     Route::put('/user', [UserController::class, 'update'])->name('user.update');
 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');

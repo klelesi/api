@@ -34,7 +34,7 @@ class CommentFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Comment $comment) {
-            $markdown = $this->faker->paragraphs(6, true);
+            $markdown = $this->faker->paragraphs($this->faker->numberBetween(1, 6), true);
             $html = (new CustomParsedown())->setSafeMode(true)->text($markdown);
 
             $comment->markdown()->save(Markdown::create([

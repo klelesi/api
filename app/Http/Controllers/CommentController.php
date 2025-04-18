@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -14,12 +15,13 @@ use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class CommentController extends Controller
 {
-    public function store(CreateCommentRequest $request)
+    public function store(CreateCommentRequest $request, NotificationService $notificationService)
     {
         $postId = $request->validated('postId');
 
         if ($parentId = $request->validated('parentId') ?? null) {
-            $postId = Comment::where('id', $parentId)->first()->commentable_id ?? $postId;
+            $parentComment = Comment::where('id', $parentId)->first();
+            $postId = $parentComment->commentable_id ?? $postId;
         }
 
         $post = Post::with('comments')->where('id', $postId)->firstOrFail();
@@ -53,6 +55,12 @@ class CommentController extends Controller
         $post->increment('number_of_comments');
 
         SlackAlert::message(":tada: Nov komentar! :tada: Prispevek: {$post->slug}");
+
+        if (isset($parentComment) && $parentComment) {
+            $notificationService->createNewCommentNotification($parentComment, $comment);
+        }
+
+        $notificationService->createNewCommentNotification($post, $comment);
 
         return new CommentResource($comment);
     }

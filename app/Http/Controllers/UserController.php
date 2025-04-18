@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\PasswordRequestRequest;
 use App\Http\Requests\PasswordResetRequest;
+use App\Http\Requests\ReadNotificationRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\NotificationResource;
 use App\Http\Resources\UserResource;
+use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\WelcomeNotification;
 use Illuminate\Auth\Events\PasswordReset;
@@ -110,5 +113,31 @@ class UserController extends Controller
             }),
             'roles' => $user->getRoleNames(),
         ]]);
+    }
+
+    public function notifications(Request $request)
+    {
+        $notifications = Notification::where('user_id', $request->user()->id)
+            ->where('read_at', null)
+            ->with(['post', 'comment'])
+            ->get();
+
+        return NotificationResource::collection($notifications);
+    }
+
+    public function readNotification(ReadNotificationRequest $request)
+    {
+        $notificationId = $request->validated('notificationId');
+
+        $notification = Notification::where('user_id', $request->user()->id)
+            ->where('id', $notificationId)
+            ->first();
+
+        if ($notification) {
+            $notification->read_at = now();
+            $notification->save();
+        }
+
+        return response()->json(['data' => null]);
     }
 }
