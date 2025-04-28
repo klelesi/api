@@ -13,7 +13,7 @@ class FeedController extends Controller
         $query = Post::query()
             ->orderBy('created_at', 'DESC');
 
-        $with = ['author', 'markdown', 'link'];
+        $with = ['author', 'markdown', 'link', 'score'];
         if ($request->user()) {
             $with[] = 'interactions';
         }

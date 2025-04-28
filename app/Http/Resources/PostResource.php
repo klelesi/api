@@ -48,6 +48,7 @@ class PostResource extends JsonResource
             'interactions' => $this->whenLoaded('interactions', function () {
                 return UserInteractionResource::collection($this->interactions);
             }),
+            'score' => $this->score->score,
             'lockedAt' => $this->locked_at,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,

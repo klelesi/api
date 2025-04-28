@@ -58,6 +58,16 @@ class PostTest extends TestCase
         $responseSlug = $this->getJson(route('posts.show', ['id' => $post->slug]))->assertStatus(200);
     }
 
+    public function test_it_fetches_a_comment_score()
+    {
+        $post = Post::factory()->markdownPost()->createOne();
+        $comment = Comment::factory()->createOne(['commentable_id' => $post->id]);
+
+        $json = $this->getJson(route('posts.show', ['id' => $post->id]))->assertStatus(200)->json('data');
+
+        $this->assertSame(0, $json['comments'][0]['score']);
+    }
+
     public function test_it_fetches_a_post_and_comments()
     {
         $post = Post::factory()->markdownPost()->createOne();
@@ -85,6 +95,7 @@ class PostTest extends TestCase
         $this->assertSame($response->json('data.author.id'), $post->author->id);
         $this->assertSame($response->json('data.author.name'), $post->author->name);
         $this->assertNull($response->json('data.lockedAt'));
+        $this->assertSame(0, $response->json('data.score'));
         $this->assertNotNull($response->json('data.createdAt'));
         $this->assertNotNull($response->json('data.updatedAt'));
     }
@@ -105,6 +116,7 @@ class PostTest extends TestCase
         $this->assertSame($response->json('data.author.name'), $post->author->name);
         $this->assertNotNull($response->json('data.urlMeta'));
         $this->assertNull($response->json('data.lockedAt'));
+        $this->assertSame(0, $response->json('data.score'));
         $this->assertNotNull($response->json('data.createdAt'));
         $this->assertNotNull($response->json('data.updatedAt'));
     }

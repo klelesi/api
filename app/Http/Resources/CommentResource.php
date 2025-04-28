@@ -23,6 +23,7 @@ class CommentResource extends JsonResource
             'html' => $this->when($this->deleted_at === null, $this->markdown->html, __('content.deleted_comment')),
             'markdown' => $this->when($this->deleted_at === null, $this->markdown->markdown, __('content.deleted_comment')),
             'comments'=> CommentResource::collection(collect($this->comments)),
+            'score' => $this->score->score,
             'lockedAt' => $this->locked_at,
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,

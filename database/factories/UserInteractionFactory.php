@@ -28,4 +28,26 @@ class UserInteractionFactory extends Factory
             'interactable_id' => Post::factory()->markdownPost(),
         ];
     }
+
+    public function postViewInteraction()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => UserInteraction::TYPE_VIEW,
+                'interactable_type' => Post::class,
+                'interactable_id' => Post::factory()->markdownPost(),
+            ];
+        });
+    }
+
+    public function postUpvoteInteraction()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => UserInteraction::TYPE_UPVOTE,
+                'interactable_type' => Post::class,
+                'interactable_id' => Post::factory()->markdownPost(),
+            ];
+        });
+    }
 }

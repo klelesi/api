@@ -33,7 +33,6 @@ class PostFactory extends Factory
 
     public function markdownPost()
     {
-
         return $this->state(function (array $attributes) {
             $markdown = $this->faker->paragraphs(6, true);
             $html = (new CustomParsedown())->setSafeMode(true)->text($markdown);

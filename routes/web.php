@@ -46,5 +46,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/comments/{id}/unlock', [CommentController::class, 'unlock'])->name('comments.unlock');
 
     Route::post('/interactions', [UserInteractionController::class, 'store'])->name('interactions.store');
+    Route::post('/interactions/remove', [UserInteractionController::class, 'delete'])->name('interactions.delete');
     Route::get('/interactions/posts', [UserInteractionController::class, 'posts'])->name('interactions.posts');
 });

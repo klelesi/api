@@ -11,9 +11,11 @@ class UserInteraction extends Model
     /** @use HasFactory<\Database\Factories\UserInteractionFactory> */
     use HasFactory, HasUuids;
 
+    const TYPE_DOWNVOTE = 'downvote';
     protected $guarded = [];
 
     const TYPE_VIEW = 'view';
+    const TYPE_UPVOTE = 'upvote';
 
     public function interactable()
     {

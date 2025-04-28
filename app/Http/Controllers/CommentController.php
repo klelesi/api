@@ -8,6 +8,7 @@ use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Services\NotificationService;
+use App\Services\UserInteractionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,7 +16,7 @@ use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class CommentController extends Controller
 {
-    public function store(CreateCommentRequest $request, NotificationService $notificationService)
+    public function store(CreateCommentRequest $request, NotificationService $notificationService, UserInteractionService $userInteractionService): CommentResource
     {
         $postId = $request->validated('postId');
 
@@ -53,6 +54,7 @@ class CommentController extends Controller
         ]);
 
         $post->increment('number_of_comments');
+        $userInteractionService->addCommentUpvote($request->user(), $comment);
 
         SlackAlert::message(":tada: Nov komentar! :tada: Prispevek: {$post->slug}");
 

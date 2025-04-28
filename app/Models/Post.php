@@ -39,6 +39,20 @@ class Post extends Model
             ->slugsShouldBeNoLongerThan(240);
     }
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Post $post) {
+            Score::create([
+                'scorable_id' => $post->id,
+                'scorable_type' => Post::class,
+                'score' => 0,
+            ]);
+        });
+    }
+
     public function isLocked()
     {
         return $this->locked_at !== null;
@@ -54,6 +68,11 @@ class Post extends Model
         return $this->morphOne(Markdown::class, 'markdownable');
     }
 
+    public function score(): MorphOne
+    {
+        return $this->morphOne(Score::class, 'scorable');
+    }
+
     public function link(): MorphOne
     {
         return $this->morphOne(Link::class, 'linkable');
@@ -61,7 +80,7 @@ class Post extends Model
 
     public function comments()
     {
-        return $this->morphMany(Comment::class, 'commentable')->withTrashed();
+        return $this->morphMany(Comment::class, 'commentable')->withTrashed()->with(['score', 'author']);
     }
 
     public function interactions()
@@ -97,7 +116,7 @@ class Post extends Model
     private function resolveLockedStatus(array $comments, string $locked_at = null)
     {
         foreach ($comments as $comment) {
-            if($locked_at){
+            if ($locked_at) {
                 $comment->locked_at = $locked_at;
             }
             $this->resolveLockedStatus($comment->comments, $comment->locked_at);

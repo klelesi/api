@@ -24,8 +24,9 @@ class StoreUserInteractionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', 'in:' . implode(',', [UserInteraction::TYPE_VIEW])],
-            'postId' => ['required', 'exists:posts,id'],
+            'type' => ['required', 'in:' . implode(',', [UserInteraction::TYPE_VIEW, UserInteraction::TYPE_UPVOTE, UserInteraction::TYPE_DOWNVOTE])],
+            'postId' => ['required_without:commentId', 'exists:posts,id'],
+            'commentId' => ['required_without:postId', 'exists:comments,id'],
         ];
     }
 }

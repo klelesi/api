@@ -8,6 +8,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\LinkService;
+use App\Services\UserInteractionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Spatie\SlackAlerts\Facades\SlackAlert;
@@ -18,7 +19,7 @@ class PostController extends Controller
     {
     }
 
-    public function store(CreatePostRequest $request)
+    public function store(CreatePostRequest $request, UserInteractionService $userInteractionService)
     {
         switch ($request->validated('postType')) {
             case Post::POST_TYPE_MARKDOWN:
@@ -28,6 +29,8 @@ class PostController extends Controller
                 $post = $this->createLinkPost($request->validated(), $request->user('sanctum'));
                 break;
         }
+
+        $userInteractionService->addPostUpvote($request->user(), $post);
 
         SlackAlert::message(":tada: Nov prispevek! :tada: Prispevek: {$post->slug}");
 
@@ -74,7 +77,7 @@ class PostController extends Controller
     public function show(string $id)
     {
         $post = Post::where('id', $id)->orWhere('slug', $id)
-            ->with(['comments', 'author'])
+            ->with(['comments', 'author', 'score'])
             ->firstOrFail();
 
         return new PostResource($post);

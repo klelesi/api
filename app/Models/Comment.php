@@ -16,6 +16,17 @@ class Comment extends Model
 
     public array $comments = [];
 
+    protected static function booted(): void
+    {
+        static::created(function (Comment $comment) {
+            Score::create([
+                'scorable_id' => $comment->id,
+                'scorable_type' => Comment::class,
+                'score' => 0,
+            ]);
+        });
+    }
+
     protected $guarded = [];
 
     public function markdown(): MorphOne
@@ -28,8 +39,14 @@ class Comment extends Model
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    public function commentable(){
+    public function commentable()
+    {
         return $this->morphTo();
+    }
+
+    public function score(): MorphOne
+    {
+        return $this->morphOne(Score::class, 'scorable');
     }
 
     public function isLocked()
