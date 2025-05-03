@@ -96,6 +96,8 @@ class CommentController extends Controller
             'html' => $this->parseMarkdown($request->validated('markdown')),
         ]);
 
+        $comment->touch();
+
         return new CommentResource($comment);
     }
 
