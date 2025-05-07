@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Services\FrontendAppHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,7 +15,7 @@ class WelcomeNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(private FrontendAppHelper $helper)
     {
         //
     }
@@ -41,7 +42,7 @@ class WelcomeNotification extends Notification
             ->line("Sem Miha in zelo me veseli, da smo te končno prepričali, da postaneš del naše skupnosti.")
             ->line("Vedno bo prostor zate, ne glede na to, ali le nemo opazuješ ali pa aktivno sodeluješ s komentarji in prispevki.")
             ->line("Piši mi, če kaj potrebuješ.")
-            ->action('klele.si', config('app.after_auth_redirect_url'))
+            ->action('klele.si', $this->helper->getLoginFormUrl())
             ->salutation("Vse najlepše, Miha.");
     }
 

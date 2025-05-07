@@ -54,8 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'after_auth_redirect_url' => env('APP_AFTER_AUTH_REDIRECT_URL', 'http://localhost'),
-    'reset_password_url' => env('APP_RESET_PASSWORD_URL', 'http://localhost'),
+    'frontend_url' => env('APP_FRONTEND_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------

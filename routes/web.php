@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\PostController;
@@ -15,12 +15,12 @@ Route::post('/reports', [ReportController::class, 'store'])->name('reports.store
 
 Route::post('/auth/register', [UserController::class, 'register'])->name('register');
 Route::post('/auth/login', [UserController::class, 'login'])->name('login');
-Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+Route::post('/auth/logout', [OAuthController::class, 'logout'])->name('auth.logout');
 Route::post('/auth/password-request', [UserController::class, 'passwordRequest'])->name('password.request');
 Route::post('/auth/password-reset', [UserController::class, 'passwordReset'])->name('password.reset');
 
-Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirect'])->name('auth.redirect');
-Route::get('/auth/{provider}/callback', [AuthController::class, 'callback'])->name('auth.callback');
+Route::get('/auth/{provider}/redirect', [OAuthController::class, 'redirect'])->name('auth.redirect');
+Route::get('/auth/{provider}/callback', [OAuthController::class, 'callback'])->name('auth.callback');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/markdown', [\App\Http\Controllers\MarkdownController::class, 'preview'])->name('markdown.preview');
@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/notifications', [UserController::class, 'notifications'])->name('user.notifications');
     Route::post('/user/notifications', [UserController::class, 'readNotification']);
     Route::put('/user', [UserController::class, 'update'])->name('user.update');
+    Route::delete('/auth/{provider}', [UserController::class, 'deleteProvider'])->name('auth.provider.delete');
 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');

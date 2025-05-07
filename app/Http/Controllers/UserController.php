@@ -11,31 +11,29 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\NotificationResource;
 use App\Http\Resources\UserResource;
 use App\Models\Notification;
+use App\Models\SocialiteUser;
 use App\Models\User;
 use App\Notifications\WelcomeNotification;
+use App\Services\FrontendAppHelper;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class UserController extends Controller
 {
-    public function register(RegisterUserRequest $request)
+    public function register(RegisterUserRequest $request, FrontendAppHelper $helper)
     {
-        $user = User::create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => bcrypt($request->validated('password')),
-            'username' => $request->validated('username'),
-        ]);
+        $user = $this->handleRegister($request);
 
         $request->session()->regenerate();
         Auth::login($user);
 
-        $user->notify(new WelcomeNotification());
+        $user->notify(new WelcomeNotification($helper));
         SlackAlert::message(":tada: Nov uporabnik! :tada:");
 
         return new UserResource($user);
@@ -53,6 +51,15 @@ class UserController extends Controller
             'message' => 'Tole pa ni pravilno.',
             'errors' => ['password' => ['Tole pa ni pravilno.']],
         ], 422);
+    }
+
+    public function deleteProvider(string $provider, Request $request)
+    {
+        SocialiteUser::where('user_id', $request->user()->id)
+            ->where('provider', $provider)
+            ->delete();
+
+        return new UserResource(Auth::user()->refresh());
     }
 
     public function passwordRequest(PasswordRequestRequest $request)
@@ -139,5 +146,45 @@ class UserController extends Controller
         }
 
         return response()->json(['data' => null]);
+    }
+
+    private function handleRegister(RegisterUserRequest $request)
+    {
+        if ($token = $request->validated('token')) {
+            return $this->handleOAuthRegister($request, $token);
+        }
+
+        //  via non OAuth
+        return User::create([
+            'name' => $request->validated('name'),
+            'email' => $request->validated('email'),
+            'password' => bcrypt($request->validated('password')),
+            'username' => $request->validated('username'),
+        ]);
+    }
+
+    private function handleOAuthRegister(RegisterUserRequest $request, string $token)
+    {
+        $socialiteUser = SocialiteUser::where('id', $token)->first();
+
+        if (!$socialiteUser) {
+            abort(400, "No user associated with this account. Please redo the OAuth process.");
+        }
+
+        if ($socialiteUser->user_id) {
+            abort(400, "A user is already associated with this account. Please login.");
+        }
+
+        $user = User::create([
+            'name' => $request->validated('name'),
+            'email' => $request->validated('email'),
+            'password' => bcrypt(Str::password()),
+            'username' => $request->validated('username'),
+        ]);
+
+        $socialiteUser->user_id = $user->id;
+        $socialiteUser->save();
+
+        return $user;
     }
 }

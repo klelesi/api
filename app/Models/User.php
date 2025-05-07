@@ -4,11 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\ResetPasswordNotification;
+use App\Services\FrontendAppHelper;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\App;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -52,9 +54,15 @@ class User extends Authenticatable
         ];
     }
 
+    public function socialiteUsers()
+    {
+        return $this->hasMany(SocialiteUser::class);
+    }
+
     public function sendPasswordResetNotification($token): void
     {
-        $url = config('app.reset_password_url') . $token;
+        $helper = App::make(FrontendAppHelper::class);
+        $url = $helper->getPasswordResetUrl($token);
 
         $this->notify(new ResetPasswordNotification($url));
     }
