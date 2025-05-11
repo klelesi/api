@@ -11,6 +11,7 @@ return [
     'alpha'                  => ':Attribute lahko vsebuje samo črke.',
     'alpha_dash'             => ':Attribute lahko vsebuje samo črke, številke in črtice.',
     'alpha_num'              => ':Attribute lahko vsebuje samo črke in številke.',
+    'any_of'                 => 'Polje :attribute je neveljavno.',
     'array'                  => ':Attribute mora biti polje.',
     'ascii'                  => ':Attribute sme vsebovati le enobajtne alfanumerične znake in simbole.',
     'before'                 => ':Attribute mora biti pred datumom :date.',
