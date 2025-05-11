@@ -24,6 +24,29 @@ class FeedTest extends TestCase
         $this->assertNotNull($response->json('meta'));
     }
 
+    public function test_it_fetches_a_paginated_feed_with_custom_per_page()
+    {
+        $posts = Post::factory()->markdownPost()->count(10)->create();
+
+        $response = $this->getJson(route('feed', ['perPage' => 5]))->assertStatus(200);
+
+        $this->assertCount(5, $response->json('data'));
+        $this->assertNotNull($response->json('meta'));
+    }
+
+    public function test_it_fetches_a_paginated_feed_for_a_user()
+    {
+        $user = User::factory()->createOne();
+        Post::factory()->markdownPost()->count(10)->create(['author_id' => $user->id]);;
+        Post::factory()->markdownPost()->count(20)->create();
+
+        $response1 = $this->getJson(route('feed', ['author' => $user->username]))->assertStatus(200);
+        $response2 = $this->getJson(route('feed', ['author' => $user->id]))->assertStatus(200);
+
+        $this->assertCount(10, $response1->json('data'));
+        $this->assertCount(10, $response2->json('data'));
+    }
+
     public function test_it_doesnt_fetch_comments()
     {
         $posts = Post::factory()->markdownPost()->count(100)->create();
